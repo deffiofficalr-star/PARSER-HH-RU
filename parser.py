@@ -11,6 +11,9 @@ class HHParser:
         self.base_url = "https://api.hh.ru/vacancies"
         self.vacancies = []
         self.filename = "vacancies.csv"
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
         
         if os.path.exists(self.filename):
             os.remove(self.filename)
@@ -41,7 +44,7 @@ class HHParser:
         
         while True:
             try:
-                response = requests.get(self.base_url, params=params)
+                response = requests.get(self.base_url, params=params, headers=self.headers)
                 response.raise_for_status()
                 data = response.json()
                 
@@ -56,7 +59,7 @@ class HHParser:
                     break
                 
                 params['page'] += 1
-                time.sleep(0.5)
+                time.sleep(1)
                 
             except requests.exceptions.RequestException as e:
                 print(f"❌ Ошибка запроса: {e}")
@@ -68,7 +71,7 @@ class HHParser:
     def parse_vacancy_details(self, vacancy_id: str) -> Optional[Dict]:
         try:
             url = f"https://api.hh.ru/vacancies/{vacancy_id}"
-            response = requests.get(url)
+            response = requests.get(url, headers=self.headers)
             response.raise_for_status()
             return response.json()
         except:
@@ -127,7 +130,7 @@ class HHParser:
                 if (i + 1) % 10 == 0:
                     print(f"   Обработано {i + 1}/{len(vacancies)} вакансий")
                 
-                time.sleep(0.3)
+                time.sleep(0.5)
                 
             except Exception as e:
                 print(f"⚠️ Ошибка при обработке вакансии: {e}")
